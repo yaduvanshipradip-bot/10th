@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { cbseData } from './data';
 import { getLiveAIHint } from './aiService';
 
@@ -8,8 +8,7 @@ export default function App() {
   const [aiHintText, setAiHintText] = useState('');
   const [loadingAI, setLoadingAI] = useState(false);
 
-  // Function to fetch AI Hint Live
-  const handleGetAIHint = async (questionText, level) => {
+  const handleGetAIHint = async (questionText: string, level: number) => {
     setLoadingAI(true);
     setHintStep(level);
     const aiResponse = await getLiveAIHint(questionText, level);
@@ -36,13 +35,13 @@ export default function App() {
           <select 
             className="w-full mt-1 p-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             onChange={(e) => {
-              const chap = cbseData.chapters.find(c => c.id === parseInt(e.target.value));
-              setSelectedChapter(chap);
+              const chap = cbseData.chapters.find((ch: any) => ch.id === parseInt(e.target.value));
+              if (chap) setSelectedChapter(chap);
               setHintStep(0);
               setAiHintText('');
             }}
           >
-            {cbseData.chapters.map(ch => (
+            {cbseData.chapters.map((ch: any) => (
               <option key={ch.id} value={ch.id}>{ch.name}</option>
             ))}
           </select>
@@ -59,7 +58,7 @@ export default function App() {
 
         {/* Question List */}
         <h2 className="text-sm font-bold text-slate-700 mb-2">High-Probability Questions:</h2>
-        {selectedChapter.questions.map((q) => (
+        {selectedChapter.questions.map((q: any) => (
           <div key={q.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
             <div className="flex justify-between items-start mb-2">
               <span className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-200">{q.tag}</span>
