@@ -3,7 +3,8 @@ import { cbseData } from './data';
 import { getLiveAIHint } from './aiService';
 
 export default function App() {
-  const [selectedChapter, setSelectedChapter] = useState(cbseData.chapters[0]);
+  const [selectedSubject, setSelectedSubject] = useState(cbseData[0]);
+  const [selectedChapter, setSelectedChapter] = useState(cbseData[0].chapters[0]);
   const [hintStep, setHintStep] = useState(0);
   const [aiHintText, setAiHintText] = useState('');
   const [loadingAI, setLoadingAI] = useState(false);
@@ -29,19 +30,45 @@ export default function App() {
 
       {/* Main Content */}
       <main className="flex-1 p-4">
+        
+        {/* Subject Selection Tabs */}
+        <div className="mb-3">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Select Subject</label>
+          <div className="flex gap-2 mt-1 overflow-x-auto pb-1">
+            {cbseData.map((sub: any) => (
+              <button
+                key={sub.subjectId}
+                onClick={() => {
+                  setSelectedSubject(sub);
+                  setSelectedChapter(sub.chapters[0]);
+                  setHintStep(0);
+                  setAiHintText('');
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition ${
+                  selectedSubject.subjectId === sub.subjectId
+                    ? 'bg-indigo-600 text-white shadow'
+                    : 'bg-white text-slate-600 border border-slate-200'
+                }`}
+              >
+                {sub.subjectName}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Chapter Selection */}
         <div className="mb-4">
           <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Select Chapter</label>
           <select 
             className="w-full mt-1 p-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             onChange={(e) => {
-              const chap = cbseData.chapters.find((ch: any) => ch.id === parseInt(e.target.value));
+              const chap = selectedSubject.chapters.find((ch: any) => ch.id === parseInt(e.target.value));
               if (chap) setSelectedChapter(chap);
               setHintStep(0);
               setAiHintText('');
             }}
           >
-            {cbseData.chapters.map((ch: any) => (
+            {selectedSubject.chapters.map((ch: any) => (
               <option key={ch.id} value={ch.id}>{ch.name}</option>
             ))}
           </select>
@@ -72,28 +99,24 @@ export default function App() {
                 🤖 Live Gemini AI Agent:
               </p>
 
-              {/* Loading State */}
               {loadingAI && (
                 <div className="p-3 bg-indigo-50 text-indigo-700 text-xs rounded-lg mb-2 animate-pulse font-medium">
                   🤖 AI Agent is generating smart hint for CBSE Board...
                 </div>
               )}
 
-              {/* Live AI Hint Display */}
               {!loadingAI && hintStep > 0 && hintStep < 3 && (
                 <div className="p-3 bg-blue-50 border border-blue-200 text-blue-900 text-xs rounded-lg mb-2 shadow-sm font-medium">
                   {aiHintText || q[`hint${hintStep}`]}
                 </div>
               )}
 
-              {/* Full Answer Display */}
               {hintStep === 3 && (
                 <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs rounded-lg mb-2 font-mono whitespace-pre-line">
                   <strong>Answer:</strong><br />{q.answer}
                 </div>
               )}
 
-              {/* Trigger Buttons */}
               <div className="flex gap-2 mt-3">
                 {hintStep < 2 && (
                   <button 
@@ -127,7 +150,6 @@ export default function App() {
         ))}
       </main>
 
-      {/* Footer */}
       <footer className="p-3 text-center text-xs text-slate-400 bg-white border-t">
         Powered by Google Gemini AI • CBSE 10th Prep
       </footer>
