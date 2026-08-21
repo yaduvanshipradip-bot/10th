@@ -1,0 +1,9 @@
+{
+  "short_name": "Board10X",
+  "name": "CBSE Class 10 AI Prep Agent",
+  "icons": [],
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "display": "standalone"
+}
