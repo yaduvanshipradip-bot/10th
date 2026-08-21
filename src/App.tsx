@@ -1,20 +1,31 @@
 import React, { useState } from 'react';
 import { cbseData } from './data';
+import { getLiveAIHint } from './aiService';
 
 export default function App() {
   const [selectedChapter, setSelectedChapter] = useState(cbseData.chapters[0]);
-  const [activeQuestion, setActiveQuestion] = useState(null);
-  const [hintStep, setHintStep] = useState(0); // 0: None, 1: Hint 1, 2: Hint 2, 3: Full Answer
+  const [hintStep, setHintStep] = useState(0);
+  const [aiHintText, setAiHintText] = useState('');
+  const [loadingAI, setLoadingAI] = useState(false);
+
+  // Function to fetch AI Hint Live
+  const handleGetAIHint = async (questionText, level) => {
+    setLoadingAI(true);
+    setHintStep(level);
+    const aiResponse = await getLiveAIHint(questionText, level);
+    setAiHintText(aiResponse);
+    setLoadingAI(false);
+  };
 
   return (
     <div className="max-w-md mx-auto min-h-screen bg-slate-100 flex flex-col shadow-lg">
       {/* Header */}
       <header className="bg-indigo-600 text-white p-4 sticky top-0 z-10 shadow-md">
         <div className="flex justify-between items-center">
-          <h1 className="font-bold text-lg">⚡ Board10X AI prep Agent</h1>
+          <h1 className="font-bold text-lg">⚡ Board10X AI Agent</h1>
           <span className="bg-indigo-800 text-xs px-2 py-1 rounded text-indigo-200">10th CBSE</span>
         </div>
-        <p className="text-xs text-indigo-200 mt-1">10-Year PYQ Analysis + Smart AI Hints</p>
+        <p className="text-xs text-indigo-200 mt-1">10-Year PYQ Analysis + Live Gemini AI Hints</p>
       </header>
 
       {/* Main Content */}
@@ -27,8 +38,8 @@ export default function App() {
             onChange={(e) => {
               const chap = cbseData.chapters.find(c => c.id === parseInt(e.target.value));
               setSelectedChapter(chap);
-              setActiveQuestion(null);
               setHintStep(0);
+              setAiHintText('');
             }}
           >
             {cbseData.chapters.map(ch => (
@@ -59,36 +70,38 @@ export default function App() {
             {/* Interactive AI Hint Agent */}
             <div className="border-t pt-3 mt-2 bg-slate-50 -mx-4 -mb-4 p-4 rounded-b-xl">
               <p className="text-xs font-bold text-indigo-600 mb-2 flex items-center gap-1">
-                🤖 AI Tutor Agent:
+                🤖 Live Gemini AI Agent:
               </p>
 
-              {/* Dynamic Hint Display */}
-              {hintStep >= 1 && (
-                <div className="p-2.5 bg-blue-50 border border-blue-100 text-blue-900 text-xs rounded-lg mb-2 animate-fade-in">
-                  {q.hint1}
+              {/* Loading State */}
+              {loadingAI && (
+                <div className="p-3 bg-indigo-50 text-indigo-700 text-xs rounded-lg mb-2 animate-pulse font-medium">
+                  🤖 AI Agent is generating smart hint for CBSE Board...
                 </div>
               )}
 
-              {hintStep >= 2 && (
-                <div className="p-2.5 bg-purple-50 border border-purple-100 text-purple-900 text-xs rounded-lg mb-2">
-                  {q.hint2}
+              {/* Live AI Hint Display */}
+              {!loadingAI && hintStep > 0 && hintStep < 3 && (
+                <div className="p-3 bg-blue-50 border border-blue-200 text-blue-900 text-xs rounded-lg mb-2 shadow-sm font-medium">
+                  {aiHintText || q[`hint${hintStep}`]}
                 </div>
               )}
 
+              {/* Full Answer Display */}
               {hintStep === 3 && (
                 <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs rounded-lg mb-2 font-mono whitespace-pre-line">
                   <strong>Answer:</strong><br />{q.answer}
                 </div>
               )}
 
-              {/* Hint Trigger Buttons */}
+              {/* Trigger Buttons */}
               <div className="flex gap-2 mt-3">
                 {hintStep < 2 && (
                   <button 
-                    onClick={() => setHintStep(prev => prev + 1)}
+                    onClick={() => handleGetAIHint(q.question, hintStep + 1)}
                     className="flex-1 bg-indigo-600 text-white text-xs font-semibold py-2 rounded-lg hover:bg-indigo-700 transition"
                   >
-                    {hintStep === 0 ? "Get Hint 1 💡" : "Need Next Hint 🔍"}
+                    {hintStep === 0 ? "Ask AI for Hint 1 💡" : "Ask AI for Hint 2 🔍"}
                   </button>
                 )}
 
@@ -103,7 +116,7 @@ export default function App() {
 
                 {hintStep > 0 && (
                   <button 
-                    onClick={() => setHintStep(0)}
+                    onClick={() => { setHintStep(0); setAiHintText(''); }}
                     className="bg-slate-200 text-slate-600 text-xs px-3 py-2 rounded-lg"
                   >
                     Reset
@@ -115,9 +128,9 @@ export default function App() {
         ))}
       </main>
 
-      {/* Footer / Call to Action */}
+      {/* Footer */}
       <footer className="p-3 text-center text-xs text-slate-400 bg-white border-t">
-        Built for CBSE Class 10 Students • PWA Ready
+        Powered by Google Gemini AI • CBSE 10th Prep
       </footer>
     </div>
   );
