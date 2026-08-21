@@ -1,13 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cbseData } from './data';
-import { getLiveAIHint } from './aiService';
+import { getAIChapterQuestions, getLiveAIHint } from './aiService';
 
 export default function App() {
   const [selectedSubject, setSelectedSubject] = useState(cbseData[0]);
   const [selectedChapter, setSelectedChapter] = useState(cbseData[0].chapters[0]);
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [hintStep, setHintStep] = useState(0);
   const [aiHintText, setAiHintText] = useState('');
   const [loadingAI, setLoadingAI] = useState(false);
+
+  // Load Questions from AI dynamically for selected chapter
+  useEffect(() => {
+    async function loadChapterData() {
+      setLoadingQuestions(true);
+      const qList = await getAIChapterQuestions(selectedSubject.subjectName, selectedChapter.name);
+      setQuestions(qList);
+      setLoadingQuestions(false);
+    }
+    loadChapterData();
+  }, [selectedChapter]);
 
   const handleGetAIHint = async (questionText: string, level: number) => {
     setLoadingAI(true);
@@ -19,16 +32,14 @@ export default function App() {
 
   return (
     <div className="max-w-md mx-auto min-h-screen bg-slate-100 flex flex-col shadow-lg">
-      {/* Header */}
       <header className="bg-indigo-600 text-white p-4 sticky top-0 z-10 shadow-md">
         <div className="flex justify-between items-center">
           <h1 className="font-bold text-lg">⚡ Board10X AI Agent</h1>
           <span className="bg-indigo-800 text-xs px-2 py-1 rounded text-indigo-200">10th CBSE</span>
         </div>
-        <p className="text-xs text-indigo-200 mt-1">10-Year PYQ Analysis + Live Gemini AI Hints</p>
+        <p className="text-xs text-indigo-200 mt-1">Full 10th Syllabus • 10-Year Trend • AI Tutor</p>
       </header>
 
-      {/* Main Content */}
       <main className="flex-1 p-4">
         
         {/* Subject Selection Tabs */}
@@ -58,14 +69,17 @@ export default function App() {
 
         {/* Chapter Selection */}
         <div className="mb-4">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Select Chapter</label>
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Select NCERT Chapter</label>
           <select 
             className="w-full mt-1 p-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={selectedChapter.id}
             onChange={(e) => {
               const chap = selectedSubject.chapters.find((ch: any) => ch.id === parseInt(e.target.value));
-              if (chap) setSelectedChapter(chap);
-              setHintStep(0);
-              setAiHintText('');
+              if (chap) {
+                setSelectedChapter(chap);
+                setHintStep(0);
+                setAiHintText('');
+              }
             }}
           >
             {selectedSubject.chapters.map((ch: any) => (
@@ -85,7 +99,14 @@ export default function App() {
 
         {/* Question List */}
         <h2 className="text-sm font-bold text-slate-700 mb-2">High-Probability Questions:</h2>
-        {selectedChapter.questions.map((q: any) => (
+        
+        {loadingQuestions && (
+          <div className="bg-white p-6 rounded-xl shadow-sm text-center">
+            <p className="text-xs font-bold text-indigo-600 animate-pulse">🤖 AI Agent is generating Board Questions for {selectedChapter.name}...</p>
+          </div>
+        )}
+
+        {!loadingQuestions && questions.map((q: any) => (
           <div key={q.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
             <div className="flex justify-between items-start mb-2">
               <span className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-200">{q.tag}</span>
@@ -93,7 +114,6 @@ export default function App() {
             </div>
             <p className="text-sm font-medium text-slate-800 mb-3">{q.question}</p>
 
-            {/* Interactive AI Hint Agent */}
             <div className="border-t pt-3 mt-2 bg-slate-50 -mx-4 -mb-4 p-4 rounded-b-xl">
               <p className="text-xs font-bold text-indigo-600 mb-2 flex items-center gap-1">
                 🤖 Live Gemini AI Agent:
