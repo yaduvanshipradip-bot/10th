@@ -11,7 +11,7 @@ export default function App() {
       {/* Header */}
       <header className="bg-indigo-600 text-white p-4 sticky top-0 z-10 shadow-md">
         <div className="flex justify-between items-center">
-          <h1 className="font-bold text-lg">⚡ Board10X AI Agent</h1>
+          <h1 className="font-bold text-lg">⚡ Board10X AI prep Agent</h1>
           <span className="bg-indigo-800 text-xs px-2 py-1 rounded text-indigo-200">10th CBSE</span>
         </div>
         <p className="text-xs text-indigo-200 mt-1">10-Year PYQ Analysis + Smart AI Hints</p>
