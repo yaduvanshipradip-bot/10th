@@ -323,7 +323,7 @@ export default function App() {
 
       {/* FOOTER */}
       <footer className="p-3 text-center text-[10px] text-slate-500 bg-slate-950 border-t border-slate-800">
-        Board10X AI Agent • Powered by Google Gemini AI
+        Board10X  AI Agent • Powered by Google Gemini AI
       </footer>
     </div>
   );
