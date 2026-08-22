@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { cbseData } from './data';
 import { getAIChapterQuestions, getLiveAIHint } from './aiService';
 
 const categories = [
-  "🎯 All Types",
   "🔘 MCQs (1 Mark)",
   "🧩 Assertion & Reason",
   "📖 Case Study (4 Marks)",
@@ -12,201 +11,314 @@ const categories = [
 ];
 
 export default function App() {
+  // Navigation State: 'setup' | 'qlist' | 'qdetail'
+  const [screen, setScreen] = useState<'setup' | 'qlist' | 'qdetail'>('setup');
+
+  // Selection States
   const [selectedSubject, setSelectedSubject] = useState(cbseData[0]);
   const [selectedChapter, setSelectedChapter] = useState(cbseData[0].chapters[0]);
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
-  
+  const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
+
+  // Questions State
   const [questions, setQuestions] = useState<any[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
+
+  // AI Hint States
   const [hintStep, setHintStep] = useState(0);
   const [aiHintText, setAiHintText] = useState('');
   const [loadingAI, setLoadingAI] = useState(false);
 
-  // Load Questions from AI dynamically based on Chapter AND Category
-  useEffect(() => {
-    async function loadChapterData() {
-      setLoadingQuestions(true);
-      const qList = await getAIChapterQuestions(selectedSubject.subjectName, selectedChapter.name, selectedCategory);
-      setQuestions(qList);
-      setLoadingQuestions(false);
-    }
-    loadChapterData();
-  }, [selectedChapter, selectedCategory]);
+  // Submit on Page 1 -> Load 5 Questions -> Go to Page 2
+  const handleStartPractice = async () => {
+    setLoadingQuestions(true);
+    setScreen('qlist');
+    const qList = await getAIChapterQuestions(selectedSubject.subjectName, selectedChapter.name, selectedCategory);
+    setQuestions(qList);
+    setLoadingQuestions(false);
+  };
 
-  const handleGetAIHint = async (questionText: string, level: number) => {
+  // Click Question on Page 2 -> Go to Page 3
+  const handleSelectQuestion = (q: any) => {
+    setSelectedQuestion(q);
+    setHintStep(0);
+    setAiHintText('');
+    setScreen('qdetail');
+  };
+
+  // Get AI Hint on Page 3
+  const handleGetAIHint = async (level: number) => {
     setLoadingAI(true);
     setHintStep(level);
-    const aiResponse = await getLiveAIHint(questionText, level);
+    const aiResponse = await getLiveAIHint(selectedQuestion.question, level);
     setAiHintText(aiResponse);
     setLoadingAI(false);
   };
 
   return (
-    <div className="max-w-md mx-auto min-h-screen bg-slate-100 flex flex-col shadow-lg">
-      <header className="bg-indigo-600 text-white p-4 sticky top-0 z-10 shadow-md">
+    <div className="max-w-md mx-auto min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans shadow-2xl">
+
+      {/* HEADER */}
+      <header className="bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-600 text-white p-4 sticky top-0 z-20 shadow-lg">
         <div className="flex justify-between items-center">
-          <h1 className="font-bold text-lg">⚡ Board10X AI Agent</h1>
-          <span className="bg-indigo-800 text-xs px-2 py-1 rounded text-indigo-200">CBSE 2025 Pattern</span>
+          <div className="flex items-center gap-2">
+            {screen !== 'setup' && (
+              <button 
+                onClick={() => setScreen(screen === 'qdetail' ? 'qlist' : 'setup')}
+                className="bg-white/20 hover:bg-white/30 p-1.5 rounded-lg text-xs font-bold transition"
+              >
+                ⬅ Back
+              </button>
+            )}
+            <h1 className="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-200 to-white">
+              ⚡ Board10X
+            </h1>
+          </div>
+          <span className="bg-amber-400 text-slate-950 font-extrabold text-[10px] px-2.5 py-1 rounded-full uppercase shadow">
+            CBSE 2025
+          </span>
         </div>
-        <p className="text-xs text-indigo-200 mt-1">MCQs • Assertion-Reason • Case Studies • PYQ</p>
       </header>
 
-      <main className="flex-1 p-4">
-        
-        {/* Subject Selection Tabs */}
-        <div className="mb-3">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Select Subject</label>
-          <div className="flex gap-2 mt-1 overflow-x-auto pb-1">
-            {cbseData.map((sub: any) => (
-              <button
-                key={sub.subjectId}
-                onClick={() => {
-                  setSelectedSubject(sub);
-                  setSelectedChapter(sub.chapters[0]);
-                  setHintStep(0);
-                  setAiHintText('');
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition ${
-                  selectedSubject.subjectId === sub.subjectId
-                    ? 'bg-indigo-600 text-white shadow'
-                    : 'bg-white text-slate-600 border border-slate-200'
-                }`}
-              >
-                {sub.subjectName}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Chapter Selection */}
-        <div className="mb-3">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Select NCERT Chapter</label>
-          <select 
-            className="w-full mt-1 p-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            value={selectedChapter.id}
-            onChange={(e) => {
-              const chap = selectedSubject.chapters.find((ch: any) => ch.id === parseInt(e.target.value));
-              if (chap) {
-                setSelectedChapter(chap);
-                setHintStep(0);
-                setAiHintText('');
-              }
-            }}
-          >
-            {selectedSubject.chapters.map((ch: any) => (
-              <option key={ch.id} value={ch.id}>{ch.name}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Exam Pattern Category Tabs (NEW CBSE PATTERN) */}
-        <div className="mb-4">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Exam Pattern Category</label>
-          <div className="flex gap-1.5 mt-1 overflow-x-auto pb-1">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => {
-                  setSelectedCategory(cat);
-                  setHintStep(0);
-                  setAiHintText('');
-                }}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-bold whitespace-nowrap transition ${
-                  selectedCategory === cat
-                    ? 'bg-amber-500 text-white shadow'
-                    : 'bg-white text-slate-600 border border-slate-200'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 10-Year Trend Analysis Box */}
-        <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg mb-4">
-          <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-amber-800">🔥 10-Year CBSE Trend:</span>
-            <span className="text-xs font-extrabold text-red-600 bg-red-100 px-2 py-0.5 rounded">{selectedChapter.probability}</span>
-          </div>
-          <p className="text-xs text-amber-700 mt-1">{selectedChapter.frequency}</p>
-        </div>
-
-        {/* Question List */}
-        <h2 className="text-sm font-bold text-slate-700 mb-2">High-Probability Questions ({selectedCategory}):</h2>
-        
-        {loadingQuestions && (
-          <div className="bg-white p-6 rounded-xl shadow-sm text-center">
-            <p className="text-xs font-bold text-indigo-600 animate-pulse">🤖 AI Agent is generating {selectedCategory} Questions for {selectedChapter.name}...</p>
-          </div>
-        )}
-
-        {!loadingQuestions && questions.map((q: any) => (
-          <div key={q.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
-            <div className="flex justify-between items-start mb-2">
-              <span className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-200">{q.tag}</span>
-              <span className="text-xs font-semibold text-slate-400">{q.marks} Marks</span>
+      {/* ================= PAGE 1: SETUP SCREEN ================= */}
+      {screen === 'setup' && (
+        <main className="flex-1 p-5 flex flex-col justify-between">
+          <div>
+            {/* Title Badge */}
+            <div className="text-center my-3">
+              <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs px-3 py-1 rounded-full font-semibold">
+                🎯 AI Exam Predictor Agent
+              </span>
+              <h2 className="text-xl font-bold mt-2 text-white">Target Your Board Marks</h2>
+              <p className="text-xs text-slate-400 mt-1">50 High-Probability Questions Per Chapter</p>
             </div>
-            <p className="text-sm font-medium text-slate-800 mb-3 whitespace-pre-line">{q.question}</p>
 
-            <div className="border-t pt-3 mt-2 bg-slate-50 -mx-4 -mb-4 p-4 rounded-b-xl">
-              <p className="text-xs font-bold text-indigo-600 mb-2 flex items-center gap-1">
-                🤖 Live Gemini AI Agent:
-              </p>
-
-              {loadingAI && (
-                <div className="p-3 bg-indigo-50 text-indigo-700 text-xs rounded-lg mb-2 animate-pulse font-medium">
-                  🤖 AI Agent is generating smart hint for CBSE Board...
-                </div>
-              )}
-
-              {!loadingAI && hintStep > 0 && hintStep < 3 && (
-                <div className="p-3 bg-blue-50 border border-blue-200 text-blue-900 text-xs rounded-lg mb-2 shadow-sm font-medium">
-                  {aiHintText || q[`hint${hintStep}`]}
-                </div>
-              )}
-
-              {hintStep === 3 && (
-                <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs rounded-lg mb-2 font-mono whitespace-pre-line">
-                  <strong>Answer:</strong><br />{q.answer}
-                </div>
-              )}
-
-              <div className="flex gap-2 mt-3">
-                {hintStep < 2 && (
-                  <button 
-                    onClick={() => handleGetAIHint(q.question, hintStep + 1)}
-                    className="flex-1 bg-indigo-600 text-white text-xs font-semibold py-2 rounded-lg hover:bg-indigo-700 transition"
+            {/* Step 1: Select Subject */}
+            <div className="mb-4 mt-6">
+              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">1. Select Subject</label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {cbseData.map((sub: any) => (
+                  <button
+                    key={sub.subjectId}
+                    onClick={() => {
+                      setSelectedSubject(sub);
+                      setSelectedChapter(sub.chapters[0]);
+                    }}
+                    className={`p-3 rounded-xl border text-left font-bold text-xs transition flex items-center justify-between ${
+                      selectedSubject.subjectId === sub.subjectId
+                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 border-indigo-400 text-white shadow-lg scale-[1.02]'
+                        : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800'
+                    }`}
                   >
-                    {hintStep === 0 ? "Ask AI for Hint 1 💡" : "Ask AI for Hint 2 🔍"}
+                    {sub.subjectName}
+                    {selectedSubject.subjectId === sub.subjectId && <span>✓</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Step 2: Select Chapter */}
+            <div className="mb-4">
+              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">2. Select Chapter</label>
+              <select 
+                className="w-full mt-2 p-3 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                value={selectedChapter.id}
+                onChange={(e) => {
+                  const chap = selectedSubject.chapters.find((ch: any) => ch.id === parseInt(e.target.value));
+                  if (chap) setSelectedChapter(chap);
+                }}
+              >
+                {selectedSubject.chapters.map((ch: any) => (
+                  <option key={ch.id} value={ch.id}>{ch.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Step 3: Select Category */}
+            <div className="mb-6">
+              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">3. Select Question Type</label>
+              <div className="grid grid-cols-1 gap-2 mt-2">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`p-2.5 rounded-xl border text-left font-semibold text-xs transition ${
+                      selectedCategory === cat
+                        ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold'
+                        : 'bg-slate-800/50 border-slate-700/60 text-slate-400'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* SUBMIT BUTTON */}
+          <button
+            onClick={handleStartPractice}
+            className="w-full py-4 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 hover:from-amber-600 hover:to-red-600 text-slate-950 font-extrabold text-sm rounded-xl shadow-xl transition transform active:scale-95 text-center flex items-center justify-center gap-2"
+          >
+            🚀 Generate 5 AI Questions ➔
+          </button>
+        </main>
+      )}
+
+
+      {/* ================= PAGE 2: QUESTION LIST SCREEN ================= */}
+      {screen === 'qlist' && (
+        <main className="flex-1 p-4">
+          {/* Breadcrumbs Banner */}
+          <div className="bg-slate-800/90 border border-slate-700/80 p-3 rounded-xl mb-4 text-xs">
+            <div className="text-slate-400 font-medium flex items-center gap-1">
+              <span>{selectedSubject.subjectName}</span> • <span>{selectedCategory}</span>
+            </div>
+            <div className="text-amber-400 font-bold text-sm mt-0.5">{selectedChapter.name}</div>
+          </div>
+
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+            Top 5 High-Probability Questions:
+          </h3>
+
+          {/* Loading Animation */}
+          {loadingQuestions && (
+            <div className="bg-slate-800/50 border border-slate-700/50 p-8 rounded-2xl text-center my-6">
+              <div className="inline-block animate-spin text-2xl mb-2">⚡</div>
+              <p className="text-xs font-bold text-indigo-400 animate-pulse">
+                AI Agent is fetching 5 CBSE Board Questions...
+              </p>
+            </div>
+          )}
+
+          {/* 5 Questions List */}
+          {!loadingQuestions && questions.map((q, index) => (
+            <div
+              key={q.id || index}
+              onClick={() => handleSelectQuestion(q)}
+              className="bg-slate-800 hover:bg-slate-750 border border-slate-700/80 hover:border-purple-500/50 p-4 rounded-xl mb-3 cursor-pointer transition shadow-md active:scale-[0.99] flex flex-col justify-between"
+            >
+              <div className="flex justify-between items-center mb-2">
+                <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold px-2 py-0.5 rounded">
+                  Q{index + 1} • {q.tag}
+                </span>
+                <span className="text-amber-400 font-bold text-xs">{q.marks} Marks</span>
+              </div>
+              <p className="text-xs font-semibold text-slate-200 line-clamp-2 leading-relaxed">
+                {q.question}
+              </p>
+              <div className="text-right mt-3 text-[11px] font-bold text-indigo-400 flex items-center justify-end gap-1">
+                Solve with AI Hints ➔
+              </div>
+            </div>
+          ))}
+        </main>
+      )}
+
+
+      {/* ================= PAGE 3: QUESTION DETAIL & AI HINT SCREEN ================= */}
+      {screen === 'qdetail' && selectedQuestion && (
+        <main className="flex-1 p-4 flex flex-col justify-between">
+          <div>
+            {/* Header Badge */}
+            <div className="flex justify-between items-center mb-3">
+              <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                {selectedCategory}
+              </span>
+              <span className="text-slate-400 text-xs font-semibold">{selectedQuestion.marks} Marks</span>
+            </div>
+
+            {/* Question Card */}
+            <div className="bg-slate-800 border border-slate-700 p-4 rounded-xl mb-4 shadow-lg">
+              <p className="text-sm font-semibold text-slate-100 leading-relaxed whitespace-pre-line">
+                {selectedQuestion.question}
+              </p>
+            </div>
+
+            {/* AI Agent Interaction Area */}
+            <div className="bg-slate-800/80 border border-indigo-500/30 p-4 rounded-xl mb-4">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-base">🤖</span>
+                <span className="text-xs font-extrabold text-indigo-300">Live Gemini AI Tutor:</span>
+              </div>
+
+              {/* Loading AI State */}
+              {loadingAI && (
+                <div className="p-3 bg-indigo-950/60 border border-indigo-800/50 text-indigo-300 text-xs rounded-lg mb-3 animate-pulse">
+                  🤖 AI Agent is thinking... Generating hint according to CBSE marking scheme...
+                </div>
+              )}
+
+              {/* AI Hint 1 Box */}
+              {!loadingAI && hintStep >= 1 && hintStep < 3 && (
+                <div className="p-3 bg-indigo-950/80 border border-indigo-700/60 text-indigo-200 text-xs rounded-lg mb-3 leading-relaxed shadow-inner">
+                  <strong className="text-amber-400 block mb-1">💡 Hint {hintStep}:</strong>
+                  {aiHintText || selectedQuestion[`hint${hintStep}`]}
+                </div>
+              )}
+
+              {/* Full Answer Box (3rd Click) */}
+              {hintStep === 3 && (
+                <div className="p-3 bg-emerald-950/80 border border-emerald-700/60 text-emerald-200 text-xs rounded-lg mb-3 leading-relaxed font-mono whitespace-pre-line shadow-inner">
+                  <strong className="text-emerald-400 block mb-1">✅ Complete CBSE Board Solution:</strong>
+                  {selectedQuestion.answer}
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-2 mt-4">
+                {hintStep === 0 && (
+                  <button 
+                    onClick={() => handleGetAIHint(1)}
+                    className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-xs rounded-lg shadow-md hover:from-indigo-500 hover:to-purple-500 transition"
+                  >
+                    💡 Ask AI for Hint 1
                   </button>
                 )}
 
-                {hintStep >= 2 && hintStep < 3 && (
+                {hintStep === 1 && (
+                  <button 
+                    onClick={() => handleGetAIHint(2)}
+                    className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs rounded-lg shadow-md hover:from-purple-500 hover:to-pink-500 transition"
+                  >
+                    🔍 Still Confused? Ask AI for Hint 2
+                  </button>
+                )}
+
+                {hintStep === 2 && (
                   <button 
                     onClick={() => setHintStep(3)}
-                    className="flex-1 bg-emerald-600 text-white text-xs font-semibold py-2 rounded-lg hover:bg-emerald-700 transition"
+                    className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs rounded-lg shadow-md hover:from-emerald-500 hover:to-teal-500 transition"
                   >
-                    Show Full Solution ✅
+                    ✅ Reveal Complete Solution
                   </button>
                 )}
 
                 {hintStep > 0 && (
                   <button 
                     onClick={() => { setHintStep(0); setAiHintText(''); }}
-                    className="bg-slate-200 text-slate-600 text-xs px-3 py-2 rounded-lg"
+                    className="w-full py-2 bg-slate-700/60 text-slate-400 text-xs font-semibold rounded-lg hover:bg-slate-700"
                   >
-                    Reset
+                    🔄 Try Again (Reset Hints)
                   </button>
                 )}
               </div>
             </div>
           </div>
-        ))}
-      </main>
 
-      <footer className="p-3 text-center text-xs text-slate-400 bg-white border-t">
-        Updated for CBSE 2025 Pattern • Powered by Gemini AI
+          {/* Navigation to next question */}
+          <button 
+            onClick={() => setScreen('qlist')}
+            className="w-full py-3 bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs rounded-xl text-center"
+          >
+            📋 Back to Question List
+          </button>
+        </main>
+      )}
+
+      {/* FOOTER */}
+      <footer className="p-3 text-center text-[10px] text-slate-500 bg-slate-950 border-t border-slate-800">
+        Board10X AI Agent • Powered by Google Gemini AI
       </footer>
     </div>
   );
