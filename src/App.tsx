@@ -2,25 +2,36 @@ import { useState, useEffect } from 'react';
 import { cbseData } from './data';
 import { getAIChapterQuestions, getLiveAIHint } from './aiService';
 
+const categories = [
+  "🎯 All Types",
+  "🔘 MCQs (1 Mark)",
+  "🧩 Assertion & Reason",
+  "📖 Case Study (4 Marks)",
+  "📝 Short Qs (2-3 Marks)",
+  "🏆 Long Qs (5 Marks)"
+];
+
 export default function App() {
   const [selectedSubject, setSelectedSubject] = useState(cbseData[0]);
   const [selectedChapter, setSelectedChapter] = useState(cbseData[0].chapters[0]);
+  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
+  
   const [questions, setQuestions] = useState<any[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [hintStep, setHintStep] = useState(0);
   const [aiHintText, setAiHintText] = useState('');
   const [loadingAI, setLoadingAI] = useState(false);
 
-  // Load Questions from AI dynamically for selected chapter
+  // Load Questions from AI dynamically based on Chapter AND Category
   useEffect(() => {
     async function loadChapterData() {
       setLoadingQuestions(true);
-      const qList = await getAIChapterQuestions(selectedSubject.subjectName, selectedChapter.name);
+      const qList = await getAIChapterQuestions(selectedSubject.subjectName, selectedChapter.name, selectedCategory);
       setQuestions(qList);
       setLoadingQuestions(false);
     }
     loadChapterData();
-  }, [selectedChapter]);
+  }, [selectedChapter, selectedCategory]);
 
   const handleGetAIHint = async (questionText: string, level: number) => {
     setLoadingAI(true);
@@ -35,9 +46,9 @@ export default function App() {
       <header className="bg-indigo-600 text-white p-4 sticky top-0 z-10 shadow-md">
         <div className="flex justify-between items-center">
           <h1 className="font-bold text-lg">⚡ Board10X AI Agent</h1>
-          <span className="bg-indigo-800 text-xs px-2 py-1 rounded text-indigo-200">10th CBSE</span>
+          <span className="bg-indigo-800 text-xs px-2 py-1 rounded text-indigo-200">CBSE 2025 Pattern</span>
         </div>
-        <p className="text-xs text-indigo-200 mt-1">Full 10th Syllabus • 10-Year Trend • AI Tutor</p>
+        <p className="text-xs text-indigo-200 mt-1">MCQs • Assertion-Reason • Case Studies • PYQ</p>
       </header>
 
       <main className="flex-1 p-4">
@@ -68,7 +79,7 @@ export default function App() {
         </div>
 
         {/* Chapter Selection */}
-        <div className="mb-4">
+        <div className="mb-3">
           <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Select NCERT Chapter</label>
           <select 
             className="w-full mt-1 p-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -88,6 +99,30 @@ export default function App() {
           </select>
         </div>
 
+        {/* Exam Pattern Category Tabs (NEW CBSE PATTERN) */}
+        <div className="mb-4">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Exam Pattern Category</label>
+          <div className="flex gap-1.5 mt-1 overflow-x-auto pb-1">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => {
+                  setSelectedCategory(cat);
+                  setHintStep(0);
+                  setAiHintText('');
+                }}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-bold whitespace-nowrap transition ${
+                  selectedCategory === cat
+                    ? 'bg-amber-500 text-white shadow'
+                    : 'bg-white text-slate-600 border border-slate-200'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* 10-Year Trend Analysis Box */}
         <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg mb-4">
           <div className="flex justify-between items-center">
@@ -98,11 +133,11 @@ export default function App() {
         </div>
 
         {/* Question List */}
-        <h2 className="text-sm font-bold text-slate-700 mb-2">High-Probability Questions:</h2>
+        <h2 className="text-sm font-bold text-slate-700 mb-2">High-Probability Questions ({selectedCategory}):</h2>
         
         {loadingQuestions && (
           <div className="bg-white p-6 rounded-xl shadow-sm text-center">
-            <p className="text-xs font-bold text-indigo-600 animate-pulse">🤖 AI Agent is generating Board Questions for {selectedChapter.name}...</p>
+            <p className="text-xs font-bold text-indigo-600 animate-pulse">🤖 AI Agent is generating {selectedCategory} Questions for {selectedChapter.name}...</p>
           </div>
         )}
 
@@ -112,7 +147,7 @@ export default function App() {
               <span className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-200">{q.tag}</span>
               <span className="text-xs font-semibold text-slate-400">{q.marks} Marks</span>
             </div>
-            <p className="text-sm font-medium text-slate-800 mb-3">{q.question}</p>
+            <p className="text-sm font-medium text-slate-800 mb-3 whitespace-pre-line">{q.question}</p>
 
             <div className="border-t pt-3 mt-2 bg-slate-50 -mx-4 -mb-4 p-4 rounded-b-xl">
               <p className="text-xs font-bold text-indigo-600 mb-2 flex items-center gap-1">
@@ -171,7 +206,7 @@ export default function App() {
       </main>
 
       <footer className="p-3 text-center text-xs text-slate-400 bg-white border-t">
-        Powered by Google Gemini AI • CBSE 10th Prep
+        Updated for CBSE 2025 Pattern • Powered by Gemini AI
       </footer>
     </div>
   );

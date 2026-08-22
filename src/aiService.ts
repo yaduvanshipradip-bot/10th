@@ -1,23 +1,31 @@
-// Google Gemini AI Live Dynamic Content Generator
+// Google Gemini AI Live Dynamic Content Generator (CBSE New Pattern 2025)
 const GEMINI_API_KEY = "AIzaSyC-L0taKk5NVRsGH1_Sr7c0hz0rmOzCfFw";
 
-export async function getAIChapterQuestions(subjectName: string, chapterName: string) {
+export async function getAIChapterQuestions(subjectName: string, chapterName: string, category: string) {
   const prompt = `
-    You are a CBSE Class 10 Board Exam Expert.
+    You are an expert CBSE Class 10 Board Exam Paper Setter following the LATEST 2024-2025 CBSE Exam Pattern.
     Subject: ${subjectName}
     Chapter: ${chapterName}
+    Question Category: ${category}
 
-    Task: Provide 2 most repeated and high-probability CBSE Board exam questions for this chapter.
-    Format your response in JSON format like this:
+    Task: Provide 3 high-probability questions strictly belonging to category "${category}".
+    
+    Category Formatting Rules:
+    - If Category is "Assertion & Reason": Frame question as 'Assertion (A)' and 'Reason (R)' with options A, B, C, D.
+    - If Category is "Case Study": Provide a short 3-line scenario/case paragraph followed by questions.
+    - If Category is "MCQs": Provide question with 4 clear options (A, B, C, D).
+    - If Short/Long: Provide classic board subjective questions with step-by-step marking answers.
+
+    Format response in VALID JSON array like this:
     [
       {
         "id": 1,
-        "question": "Question text here",
-        "marks": 3,
-        "tag": "Most Repeated in 10-Years",
-        "hint1": "Hint 1 text",
-        "hint2": "Hint 2 text",
-        "answer": "Complete CBSE marking scheme answer text"
+        "question": "Question or Case Study text here",
+        "marks": "${category.includes('MCQ') ? '1' : category.includes('Case') ? '4' : '3'}",
+        "tag": "${category} - CBSE 2025 Pattern",
+        "hint1": "Step 1 Hint text",
+        "hint2": "Step 2 Hint text",
+        "answer": "Correct Answer with detailed explanation"
       }
     ]
     Return ONLY valid JSON array.
@@ -43,16 +51,15 @@ export async function getAIChapterQuestions(subjectName: string, chapterName: st
     console.error("AI Generation Error:", e);
   }
 
-  // Default fallback
   return [
     {
       id: 1,
-      question: `Explain the most important core concept of ${chapterName} for CBSE 10th Board Exam.`,
-      marks: 3,
-      tag: "CBSE High Probability",
-      hint1: "Focus on the fundamental definitions and key standard formulas.",
-      hint2: "Apply the standard step-by-step NCERT methodology.",
-      answer: `Refer to NCERT standard solution for ${chapterName}. Ensure key terms and balanced steps are highlighted.`
+      question: `Sample CBSE 2025 ${category} Question for ${chapterName}`,
+      marks: "3",
+      tag: `${category} Predictor`,
+      hint1: "Apply core NCERT conceptual understanding.",
+      hint2: "Follow latest marking scheme steps.",
+      answer: "Refer to standard NCERT solutions for full step-by-step evaluation."
     }
   ];
 }
@@ -62,7 +69,7 @@ export async function getLiveAIHint(questionText: string, hintLevel: number): Pr
     You are an expert CBSE Class 10 AI Tutor Agent.
     Question: "${questionText}"
     
-    Task: Provide ${hintLevel === 1 ? 'Hint 1 (A small conceptual clue/formula)' : 'Hint 2 (A step-by-step guidance hint)'}.
+    Task: Provide ${hintLevel === 1 ? 'Hint 1 (A small conceptual clue without revealing answer)' : 'Hint 2 (A step-by-step guidance hint)'}.
     Keep it short (2 sentences max). Encouraging tone.
   `;
 
@@ -79,6 +86,6 @@ export async function getLiveAIHint(questionText: string, hintLevel: number): Pr
     const data = await response.json();
     return data.candidates[0].content.parts[0].text;
   } catch (error) {
-    return "Focus on the key standard formulas and definitions given in NCERT.";
+    return "Focus on the key concepts and standard definitions given in NCERT.";
   }
 }
