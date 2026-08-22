@@ -48,6 +48,8 @@ export default function App() {
     setLoadingAI(false);
   };
 
+  const isMCQCategory = selectedCategory.includes("MCQ") || selectedCategory.includes("Assertion");
+
   return (
     <div className="max-w-md mx-auto min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans shadow-2xl">
 
@@ -196,8 +198,8 @@ export default function App() {
                 {q.question}
               </p>
 
-              {/* Render Options Preview if MCQ */}
-              {q.options && Array.isArray(q.options) && (
+              {/* Show MCQ Options ONLY IF Category is MCQ / Assertion */}
+              {isMCQCategory && q.options && Array.isArray(q.options) && (
                 <div className="grid grid-cols-2 gap-1.5 my-2">
                   {q.options.map((opt: string, i: number) => (
                     <div key={i} className="bg-slate-900/60 border border-slate-700/50 text-[10px] text-slate-300 p-1.5 rounded truncate">
@@ -232,10 +234,10 @@ export default function App() {
                 {selectedQuestion.question}
               </p>
 
-              {/* 4 Interactive MCQ Options Box */}
-              {selectedQuestion.options && Array.isArray(selectedQuestion.options) && (
+              {/* Show MCQ Options ONLY IF Category is MCQ / Assertion */}
+              {isMCQCategory && selectedQuestion.options && Array.isArray(selectedQuestion.options) && (
                 <div className="flex flex-col gap-2 mt-3 pt-3 border-t border-slate-700/60">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Select Options:</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Select Option:</span>
                   {selectedQuestion.options.map((opt: string, i: number) => (
                     <div key={i} className="bg-slate-900/90 border border-slate-700 text-xs text-slate-200 p-2.5 rounded-lg hover:border-indigo-500 transition">
                       {opt}
@@ -323,7 +325,7 @@ export default function App() {
 
       {/* FOOTER */}
       <footer className="p-3 text-center text-[10px] text-slate-500 bg-slate-950 border-t border-slate-800">
-        Board10X  AI Agent • Powered by Google Gemini AI
+        Board10X AI Agent • Powered by Google Gemini AI
       </footer>
     </div>
   );
