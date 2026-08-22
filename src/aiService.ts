@@ -1,16 +1,31 @@
-// Google Gemini AI Live Dynamic Content Generator
+// Google Gemini AI Engine with Strict Chapter & Category Isolation
 const GEMINI_API_KEY = "AIzaSyC-L0taKk5NVRsGH1_Sr7c0hz0rmOzCfFw";
 
 export async function getAIChapterQuestions(subjectName: string, chapterName: string, category: string) {
   const prompt = `
-    You are an expert CBSE Class 10 Board Exam Paper Setter.
-    Subject: ${subjectName}
-    Chapter: ${chapterName}
-    Category: ${category}
+    You are an expert CBSE Class 10 Paper Setter.
+    STRICT RULE: Focus ONLY on Chapter "${chapterName}" from Subject "${subjectName}". DO NOT mix other chapters.
+    Category: "${category}".
 
-    Task: Provide EXACTLY 5 specific high-probability CBSE Board exam questions for ${chapterName} (${category}).
-    Output MUST be a strictly formatted JSON array containing 5 objects with keys:
-    "id", "question", "marks", "tag", "hint1", "hint2", "answer".
+    Task: Provide EXACTLY 5 high-probability questions for Chapter "${chapterName}".
+
+    Formatting Rules based on Category:
+    - If Category contains "MCQs" or "Assertion": You MUST include "options" array with 4 options ["A) ...", "B) ...", "C) ...", "D) ..."].
+    - If "Case Study": Provide a short 3-line case scenario text in question.
+
+    Format response in STRICT VALID JSON Array with 5 objects:
+    [
+      {
+        "id": 1,
+        "question": "Question text specific to ${chapterName}",
+        "options": ["A) Option 1", "B) Option 2", "C) Option 3", "D) Option 4"],
+        "marks": "${category.includes('MCQ') ? '1' : category.includes('Case') ? '4' : '3'}",
+        "tag": "${category} - ${chapterName}",
+        "hint1": "Specific Hint 1 for this question",
+        "hint2": "Specific Hint 2 for this question",
+        "answer": "Correct Option & Detailed CBSE Marking Scheme Answer"
+      }
+    ]
   `;
 
   try {
@@ -35,54 +50,183 @@ export async function getAIChapterQuestions(subjectName: string, chapterName: st
     console.error("AI Generation Error:", e);
   }
 
-  // SPECIFIC REAL CBSE BOARD HIGH-QUALITY QUESTIONS
-  return [
-    {
-      id: 1,
-      question: `What happens when Calcium Oxide (Quicklime) reacts with Water in ${chapterName}? Write balanced chemical equation and identify type of reaction.`,
-      marks: "3",
-      tag: "Most Repeated (5 Times)",
-      hint1: "🔍 Hint 1: Think whether heat is released or absorbed in this reaction (Exothermic vs Endothermic).",
-      hint2: "💡 Hint 2: Quicklime (CaO) + Water (H₂O) forms Slaked Lime [Ca(OH)₂].",
-      answer: "CaO(s) + H₂O(l) → Ca(OH)₂(aq) + Heat\n\n1. Slaked Lime (Calcium Hydroxide) is formed.\n2. A large amount of heat is evolved, making it an Exothermic Combination Reaction."
-    },
-    {
-      id: 2,
-      question: `A concave mirror produces a real image 3 times the size of object placed at 10 cm in front of it. Find the image location.`,
-      marks: "3",
-      tag: "Numerical Predictor 2025",
-      hint1: "🔍 Hint 1: Magnification m = -3 for real image. Object distance u = -10 cm.",
-      hint2: "💡 Hint 2: Apply the magnification formula: m = -v / u.",
-      answer: "m = -v/u\n-3 = -v / (-10)\n-3 = v / 10\nv = -30 cm.\n\nThe image is formed 30 cm in front of the mirror."
-    },
-    {
-      id: 3,
-      question: `Prove that √5 is an Irrational Number using the method of contradiction.`,
-      marks: "3",
-      tag: "Guaranteed Board Question",
-      hint1: "🔍 Hint 1: Assume √5 = a/b where 'a' and 'b' are co-prime integers (b ≠ 0).",
-      hint2: "💡 Hint 2: Show that 5 divides both 'a' and 'b', which contradicts co-prime assumption.",
-      answer: "1. Let √5 = a/b (a, b co-prime).\n2. 5b² = a² => 5 divides a² => 5 divides a.\n3. Let a = 5c => 5b² = 25c² => b² = 5c² => 5 divides b.\n4. Contradiction! 'a' and 'b' have common factor 5. Hence √5 is irrational."
-    },
-    {
-      id: 4,
-      question: `Assertion (A): Respiration is considered an Exothermic Reaction.\nReason (R): Glucose combines with oxygen in cells releasing energy.`,
-      marks: "1",
-      tag: "Assertion & Reason Pattern",
-      hint1: "🔍 Hint 1: Check if respiration releases energy in cells.",
-      hint2: "💡 Hint 2: Exothermic process means release of energy/heat.",
-      answer: "Option (A): Both Assertion (A) and Reason (R) are true, and Reason (R) is the correct explanation of Assertion (A)."
-    },
-    {
-      id: 5,
-      question: `Explain 3 main features of the Napoleonic Code of 1804 in Social Science.`,
-      marks: "5",
-      tag: "5-Mark High Weightage",
-      hint1: "🔍 Hint 1: Think about equality before law, right to property, and abolition of feudal system.",
-      hint2: "💡 Hint 2: Mention removal of guild restrictions and transport improvements.",
-      answer: "1. Established Equality before Law.\n2. Secured Right to Property.\n3. Abolished Feudal System and freed peasants from serfdom.\n4. Removed Guild Restrictions in towns."
-    }
-  ];
+  // EXACT CHAPTER FALLBACKS (NO MIXING!)
+  return getChapterFallback(chapterName, category);
+}
+
+// Chapter-Wise Isolated Fallbacks
+function getChapterFallback(chapterName: string, category: string) {
+  const chap = chapterName.toLowerCase();
+
+  // 1. Nelson Mandela
+  if (chap.includes("nelson") || chap.includes("mandela")) {
+    return [
+      {
+        id: 1,
+        question: "On which date was the historic inauguration ceremony held in South Africa?",
+        options: ["A) 10th May 1994", "B) 15th April 1994", "C) 20th May 1995", "D) 10th March 1994"],
+        marks: "1",
+        tag: "MCQs - Nelson Mandela",
+        hint1: "🔍 Hint 1: It took place in an amphitheatre in Pretoria during autumn season.",
+        hint2: "💡 Hint 2: May 10th was the day South Africa's first democratic government was installed.",
+        answer: "Option A) 10th May 1994. The historic inauguration ceremony took place in Pretoria."
+      },
+      {
+        id: 2,
+        question: "Assertion (A): Mandela felt that the oppressor must be liberated just as surely as the oppressed.\nReason (R): A man who takes away another's freedom is a prisoner of hatred.",
+        options: ["A) Both A and R are true and R explains A", "B) Both A & R true but R does not explain A", "C) A is true, R false", "D) A is false, R true"],
+        marks: "1",
+        tag: "Assertion & Reason - Mandela",
+        hint1: "🔍 Hint 1: Consider Mandela's views on prejudice and hatred.",
+        hint2: "💡 Hint 2: Both oppressor and oppressed are robbed of humanity.",
+        answer: "Option A) Both Assertion and Reason are true and Reason is the correct explanation."
+      },
+      {
+        id: 3,
+        question: "What did courage mean to Nelson Mandela?",
+        marks: "3",
+        tag: "Short Answer - Nelson Mandela",
+        hint1: "🔍 Hint 1: Courage is not the absence of fear.",
+        hint2: "💡 Hint 2: It is the triumph over fear.",
+        answer: "To Mandela, courage was not the absence of fear, but the triumph over it. The brave man is not he who does not feel afraid, but he who conquers that fear."
+      },
+      {
+        id: 4,
+        question: "Why were two national anthems sung on the day of the inauguration?",
+        marks: "3",
+        tag: "Short Answer - Nelson Mandela",
+        hint1: "🔍 Hint 1: Think about equality between white and black communities.",
+        hint2: "💡 Hint 2: One was 'Nkosi Sikelel' (Black) and 'Die Stem' (White).",
+        answer: "Two national anthems were sung to symbolize equality between whites and blacks, signifying the end of Apartheid and unity of the nation."
+      },
+      {
+        id: 5,
+        question: "Describe the 'twin obligations' mentioned by Nelson Mandela in the chapter.",
+        marks: "5",
+        tag: "5-Mark Long Question",
+        hint1: "🔍 Hint 1: One obligation is towards family, parents, and wife.",
+        hint2: "💡 Hint 2: The second obligation is towards his people, community, and country.",
+        answer: "Mandela mentions twin obligations:\n1. Obligation to his family, parents, wife, and children.\n2. Obligation to his people, community, and his country South Africa."
+      }
+    ];
+  }
+
+  // 2. A Letter to God
+  if (chap.includes("letter") || chap.includes("god")) {
+    return [
+      {
+        id: 1,
+        question: "How much money did Lencho ask God for in his letter?",
+        options: ["A) 100 Pesos", "B) 70 Pesos", "C) 50 Pesos", "D) 150 Pesos"],
+        marks: "1",
+        tag: "MCQs - Letter to God",
+        hint1: "🔍 Hint 1: He needed it to sow his field and live until next crop.",
+        hint2: "💡 Hint 2: The postmaster could only collect 70 pesos, but Lencho asked for 100.",
+        answer: "Option A) 100 Pesos. Lencho wrote asking for 100 pesos to resow his damaged corn field."
+      },
+      {
+        id: 2,
+        question: "Why did Lencho call the post office employees 'a bunch of crooks'?",
+        marks: "3",
+        tag: "Short Answer - Lencho",
+        hint1: "🔍 Hint 1: He received only 70 pesos instead of 100.",
+        hint2: "💡 Hint 2: He believed God could not make a mistake, so post office workers stole 30 pesos.",
+        answer: "Lencho asked for 100 pesos but received only 70. Having firm faith in God, he believed God couldn't make a mistake and suspected the post office employees took the remaining 30 pesos."
+      },
+      {
+        id: 3,
+        question: "What destroyed Lencho's corn fields completely?",
+        options: ["A) Hailstorm", "B) Drought", "C) Flood", "D) Locust attack"],
+        marks: "1",
+        tag: "MCQs - Letter to God",
+        hint1: "🔍 Hint 1: Large frozen rain stones fell for an hour.",
+        hint2: "💡 Hint 2: It left the field white as if covered with salt.",
+        answer: "Option A) Hailstorm completely destroyed Lencho's field."
+      },
+      {
+        id: 4,
+        question: "Describe Lencho's faith in God. Was it blind or deep conviction?",
+        marks: "3",
+        tag: "Short Answer - Lencho",
+        hint1: "🔍 Hint 1: He treated God as a living helper.",
+        hint2: "💡 Hint 2: He didn't hesitate to write a letter to God.",
+        answer: "Lencho had unshakable and single-minded faith in God. He believed God sees everything and wrote a letter to Him as a friend."
+      },
+      {
+        id: 5,
+        question: "Write a short character sketch of the Postmaster in 'A Letter to God'.",
+        marks: "5",
+        tag: "5-Mark Character Sketch",
+        hint1: "🔍 Hint 1: He was fat, amiable, and kind-hearted.",
+        hint2: "💡 Hint 2: He gave part of his salary to preserve Lencho's faith.",
+        answer: "The Postmaster was a fat, amiable, and compassionate human being. He was deeply moved by Lencho's faith and collected 70 pesos to help him anonymously."
+      }
+    ];
+  }
+
+  // 3. Chemical Reactions (Science)
+  if (chap.includes("chemical") || chap.includes("equation")) {
+    return [
+      {
+        id: 1,
+        question: "What type of chemical reaction is: CaO(s) + H₂O(l) → Ca(OH)₂(aq) + Heat?",
+        options: ["A) Exothermic Combination", "B) Endothermic Decomposition", "C) Displacement", "D) Double Displacement"],
+        marks: "1",
+        tag: "MCQs - Chemical Reactions",
+        hint1: "🔍 Hint 1: Two reactants combine into one single product.",
+        hint2: "💡 Hint 2: Large amount of heat is evolved.",
+        answer: "Option A) Exothermic Combination Reaction."
+      },
+      {
+        id: 2,
+        question: "Why is respiration considered an exothermic reaction?",
+        marks: "2",
+        tag: "Conceptual Predictor",
+        hint1: "🔍 Hint 1: Glucose breaks down with oxygen in cells.",
+        hint2: "💡 Hint 2: Energy in the form of ATP is released.",
+        answer: "During respiration, glucose combines with oxygen in cells releasing energy (ATP) + CO2 + H2O. Thus it is exothermic."
+      },
+      {
+        id: 3,
+        question: "What happens when an iron nail is dipped in copper sulphate solution?",
+        marks: "3",
+        tag: "Displacement Reaction",
+        hint1: "🔍 Hint 1: Iron is more reactive than copper.",
+        hint2: "💡 Hint 2: Blue CuSO4 solution turns pale green (FeSO4).",
+        answer: "Fe(s) + CuSO₄(aq) → FeSO₄(aq) + Cu(s). Iron displaces copper forming pale green Ferrous Sulphate solution."
+      },
+      {
+        id: 4,
+        question: "Define Corrosion and Rancidity with one preventive measure each.",
+        marks: "3",
+        tag: "Definition & Prevention",
+        hint1: "🔍 Hint 1: Corrosion is rusting of metals. Rancidity is oxidation of fats/oils.",
+        hint2: "💡 Hint 2: Prevention: Galvanization for corrosion, Nitrogen gas for rancidity.",
+        answer: "Corrosion: Deterioration of metals by air/moisture (Prevention: Galvanization).\nRancidity: Oxidation of fats/oils in food (Prevention: Flush chips bags with N2 gas)."
+      },
+      {
+        id: 5,
+        question: "Balance the equation: Fe + H₂O → Fe₃O₄ + H₂ and identify oxidized and reduced species.",
+        marks: "5",
+        tag: "5-Mark Balancing",
+        hint1: "🔍 Hint 1: 3 Fe + 4 H2O → Fe3O4 + 4 H2.",
+        hint2: "💡 Hint 2: Fe gains oxygen (oxidized), H2O loses oxygen (reduced).",
+        answer: "Balanced Equation: 3Fe(s) + 4H₂O(g) → Fe₃O₄(s) + 4H₂(g)\n- Oxidized: Fe\n- Reduced: H₂O\n- Oxidizing Agent: H₂O\n- Reducing Agent: Fe."
+      }
+    ];
+  }
+
+  // Generic Default fallback if new chapter
+  return Array.from({ length: 5 }, (_, i) => ({
+    id: i + 1,
+    question: `Q${i + 1}: Important Board Question for ${chapterName} (${category})`,
+    options: ["A) Standard Option A", "B) Standard Option B", "C) Standard Option C", "D) Standard Option D"],
+    marks: category.includes('MCQ') ? "1" : "3",
+    tag: `${category} - ${chapterName}`,
+    hint1: `🔍 Hint 1: Focus on core NCERT definitions for ${chapterName}.`,
+    hint2: `💡 Hint 2: Follow standard step-by-step CBSE marking scheme.`,
+    answer: `Official CBSE Board Solution for ${chapterName}: Refer to standard NCERT evaluation scheme.`
+  }));
 }
 
 export async function getLiveAIHint(questionText: string, hintLevel: number): Promise<string> {
@@ -113,6 +257,6 @@ export async function getLiveAIHint(questionText: string, hintLevel: number): Pr
   }
 
   return hintLevel === 1 
-    ? "💡 Hint 1: Identify the given physical quantities and write down the standard NCERT formula."
-    : "💡 Hint 2: Substitute the values step-by-step and calculate the final result with proper S.I. units.";
+    ? "💡 Hint 1: Identify the main concept from NCERT textbook for this question."
+    : "💡 Hint 2: Apply the step-by-step standard CBSE evaluation marking scheme.";
 }

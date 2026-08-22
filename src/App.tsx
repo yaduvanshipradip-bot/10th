@@ -11,25 +11,20 @@ const categories = [
 ];
 
 export default function App() {
-  // Navigation State: 'setup' | 'qlist' | 'qdetail'
   const [screen, setScreen] = useState<'setup' | 'qlist' | 'qdetail'>('setup');
 
-  // Selection States
   const [selectedSubject, setSelectedSubject] = useState(cbseData[0]);
   const [selectedChapter, setSelectedChapter] = useState(cbseData[0].chapters[0]);
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
 
-  // Questions State
   const [questions, setQuestions] = useState<any[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
 
-  // AI Hint States
   const [hintStep, setHintStep] = useState(0);
   const [aiHintText, setAiHintText] = useState('');
   const [loadingAI, setLoadingAI] = useState(false);
 
-  // Submit on Page 1 -> Load 5 Questions -> Go to Page 2
   const handleStartPractice = async () => {
     setLoadingQuestions(true);
     setScreen('qlist');
@@ -38,7 +33,6 @@ export default function App() {
     setLoadingQuestions(false);
   };
 
-  // Click Question on Page 2 -> Go to Page 3
   const handleSelectQuestion = (q: any) => {
     setSelectedQuestion(q);
     setHintStep(0);
@@ -46,7 +40,6 @@ export default function App() {
     setScreen('qdetail');
   };
 
-  // Get AI Hint on Page 3
   const handleGetAIHint = async (level: number) => {
     setLoadingAI(true);
     setHintStep(level);
@@ -80,20 +73,19 @@ export default function App() {
         </div>
       </header>
 
-      {/* ================= PAGE 1: SETUP SCREEN ================= */}
+      {/* PAGE 1: SETUP SCREEN */}
       {screen === 'setup' && (
         <main className="flex-1 p-5 flex flex-col justify-between">
           <div>
-            {/* Title Badge */}
             <div className="text-center my-3">
               <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs px-3 py-1 rounded-full font-semibold">
-                🎯 AI Exam Predictor Agent
+                🎯 AI Chapter Predictor
               </span>
-              <h2 className="text-xl font-bold mt-2 text-white">Target Your Board Marks</h2>
-              <p className="text-xs text-slate-400 mt-1">50 High-Probability Questions Per Chapter</p>
+              <h2 className="text-xl font-bold mt-2 text-white">Target 95%+ Board Marks</h2>
+              <p className="text-xs text-slate-400 mt-1">Specific Chapter Questions & AI Hints</p>
             </div>
 
-            {/* Step 1: Select Subject */}
+            {/* Step 1: Subject */}
             <div className="mb-4 mt-6">
               <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">1. Select Subject</label>
               <div className="grid grid-cols-2 gap-2 mt-2">
@@ -117,7 +109,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Step 2: Select Chapter */}
+            {/* Step 2: Chapter */}
             <div className="mb-4">
               <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">2. Select Chapter</label>
               <select 
@@ -134,7 +126,7 @@ export default function App() {
               </select>
             </div>
 
-            {/* Step 3: Select Category */}
+            {/* Step 3: Category */}
             <div className="mb-6">
               <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">3. Select Question Type</label>
               <div className="grid grid-cols-1 gap-2 mt-2">
@@ -155,21 +147,18 @@ export default function App() {
             </div>
           </div>
 
-          {/* SUBMIT BUTTON */}
           <button
             onClick={handleStartPractice}
             className="w-full py-4 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 hover:from-amber-600 hover:to-red-600 text-slate-950 font-extrabold text-sm rounded-xl shadow-xl transition transform active:scale-95 text-center flex items-center justify-center gap-2"
           >
-            🚀 Generate 5 AI Questions ➔
+            🚀 Get 5 Chapter Questions ➔
           </button>
         </main>
       )}
 
-
-      {/* ================= PAGE 2: QUESTION LIST SCREEN ================= */}
+      {/* PAGE 2: QUESTION LIST SCREEN */}
       {screen === 'qlist' && (
         <main className="flex-1 p-4">
-          {/* Breadcrumbs Banner */}
           <div className="bg-slate-800/90 border border-slate-700/80 p-3 rounded-xl mb-4 text-xs">
             <div className="text-slate-400 font-medium flex items-center gap-1">
               <span>{selectedSubject.subjectName}</span> • <span>{selectedCategory}</span>
@@ -181,17 +170,15 @@ export default function App() {
             Top 5 High-Probability Questions:
           </h3>
 
-          {/* Loading Animation */}
           {loadingQuestions && (
             <div className="bg-slate-800/50 border border-slate-700/50 p-8 rounded-2xl text-center my-6">
               <div className="inline-block animate-spin text-2xl mb-2">⚡</div>
               <p className="text-xs font-bold text-indigo-400 animate-pulse">
-                AI Agent is fetching 5 CBSE Board Questions...
+                AI Agent is fetching 5 Chapter Questions for {selectedChapter.name}...
               </p>
             </div>
           )}
 
-          {/* 5 Questions List */}
           {!loadingQuestions && questions.map((q, index) => (
             <div
               key={q.id || index}
@@ -204,10 +191,23 @@ export default function App() {
                 </span>
                 <span className="text-amber-400 font-bold text-xs">{q.marks} Marks</span>
               </div>
-              <p className="text-xs font-semibold text-slate-200 line-clamp-2 leading-relaxed">
+
+              <p className="text-xs font-semibold text-slate-200 leading-relaxed mb-2">
                 {q.question}
               </p>
-              <div className="text-right mt-3 text-[11px] font-bold text-indigo-400 flex items-center justify-end gap-1">
+
+              {/* Render Options Preview if MCQ */}
+              {q.options && Array.isArray(q.options) && (
+                <div className="grid grid-cols-2 gap-1.5 my-2">
+                  {q.options.map((opt: string, i: number) => (
+                    <div key={i} className="bg-slate-900/60 border border-slate-700/50 text-[10px] text-slate-300 p-1.5 rounded truncate">
+                      {opt}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="text-right mt-2 text-[11px] font-bold text-indigo-400 flex items-center justify-end gap-1">
                 Solve with AI Hints ➔
               </div>
             </div>
@@ -215,12 +215,10 @@ export default function App() {
         </main>
       )}
 
-
-      {/* ================= PAGE 3: QUESTION DETAIL & AI HINT SCREEN ================= */}
+      {/* PAGE 3: QUESTION DETAIL & AI HINT SCREEN */}
       {screen === 'qdetail' && selectedQuestion && (
         <main className="flex-1 p-4 flex flex-col justify-between">
           <div>
-            {/* Header Badge */}
             <div className="flex justify-between items-center mb-3">
               <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
                 {selectedCategory}
@@ -230,9 +228,21 @@ export default function App() {
 
             {/* Question Card */}
             <div className="bg-slate-800 border border-slate-700 p-4 rounded-xl mb-4 shadow-lg">
-              <p className="text-sm font-semibold text-slate-100 leading-relaxed whitespace-pre-line">
+              <p className="text-sm font-semibold text-slate-100 leading-relaxed whitespace-pre-line mb-3">
                 {selectedQuestion.question}
               </p>
+
+              {/* 4 Interactive MCQ Options Box */}
+              {selectedQuestion.options && Array.isArray(selectedQuestion.options) && (
+                <div className="flex flex-col gap-2 mt-3 pt-3 border-t border-slate-700/60">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Select Options:</span>
+                  {selectedQuestion.options.map((opt: string, i: number) => (
+                    <div key={i} className="bg-slate-900/90 border border-slate-700 text-xs text-slate-200 p-2.5 rounded-lg hover:border-indigo-500 transition">
+                      {opt}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* AI Agent Interaction Area */}
@@ -242,14 +252,12 @@ export default function App() {
                 <span className="text-xs font-extrabold text-indigo-300">Live Gemini AI Tutor:</span>
               </div>
 
-              {/* Loading AI State */}
               {loadingAI && (
                 <div className="p-3 bg-indigo-950/60 border border-indigo-800/50 text-indigo-300 text-xs rounded-lg mb-3 animate-pulse">
                   🤖 AI Agent is thinking... Generating hint according to CBSE marking scheme...
                 </div>
               )}
 
-              {/* AI Hint 1 Box */}
               {!loadingAI && hintStep >= 1 && hintStep < 3 && (
                 <div className="p-3 bg-indigo-950/80 border border-indigo-700/60 text-indigo-200 text-xs rounded-lg mb-3 leading-relaxed shadow-inner">
                   <strong className="text-amber-400 block mb-1">💡 Hint {hintStep}:</strong>
@@ -257,7 +265,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* Full Answer Box (3rd Click) */}
               {hintStep === 3 && (
                 <div className="p-3 bg-emerald-950/80 border border-emerald-700/60 text-emerald-200 text-xs rounded-lg mb-3 leading-relaxed font-mono whitespace-pre-line shadow-inner">
                   <strong className="text-emerald-400 block mb-1">✅ Complete CBSE Board Solution:</strong>
@@ -265,7 +272,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* Action Buttons */}
               <div className="flex flex-col gap-2 mt-4">
                 {hintStep === 0 && (
                   <button 
@@ -306,7 +312,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Navigation to next question */}
           <button 
             onClick={() => setScreen('qlist')}
             className="w-full py-3 bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs rounded-xl text-center"
