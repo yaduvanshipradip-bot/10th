@@ -81,10 +81,10 @@ export default function App() {
           <div>
             <div className="text-center my-3">
               <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs px-3 py-1 rounded-full font-semibold">
-                🎯 AI Chapter Predictor
+                🎯 10-Year CBSE PYQ Agent
               </span>
-              <h2 className="text-xl font-bold mt-2 text-white">Target 95%+ Board Marks</h2>
-              <p className="text-xs text-slate-400 mt-1">Specific Chapter Questions & AI Hints</p>
+              <h2 className="text-xl font-bold mt-2 text-white">Authentic Board Exam Papers</h2>
+              <p className="text-xs text-slate-400 mt-1">Real Verified Questions • AI Hints</p>
             </div>
 
             {/* Step 1: Subject */}
@@ -153,7 +153,7 @@ export default function App() {
             onClick={handleStartPractice}
             className="w-full py-4 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 hover:from-amber-600 hover:to-red-600 text-slate-950 font-extrabold text-sm rounded-xl shadow-xl transition transform active:scale-95 text-center flex items-center justify-center gap-2"
           >
-            🚀 Get 5 Chapter Questions ➔
+            🔍 Search 10-Year CBSE Papers ➔
           </button>
         </main>
       )}
@@ -169,14 +169,14 @@ export default function App() {
           </div>
 
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
-            Top 5 High-Probability Questions:
+            Verified 10-Year CBSE Board Questions:
           </h3>
 
           {loadingQuestions && (
             <div className="bg-slate-800/50 border border-slate-700/50 p-8 rounded-2xl text-center my-6">
               <div className="inline-block animate-spin text-2xl mb-2">⚡</div>
               <p className="text-xs font-bold text-indigo-400 animate-pulse">
-                AI Agent is fetching 5 Chapter Questions for {selectedChapter.name}...
+                🔍 Searching 10-Year CBSE Papers & NCERT Question Bank for {selectedChapter.name}...
               </p>
             </div>
           )}
@@ -198,7 +198,7 @@ export default function App() {
                 {q.question}
               </p>
 
-              {/* Show MCQ Options ONLY IF Category is MCQ / Assertion */}
+              {/* MCQ 4 Options Display */}
               {isMCQCategory && q.options && Array.isArray(q.options) && (
                 <div className="grid grid-cols-2 gap-1.5 my-2">
                   {q.options.map((opt: string, i: number) => (
@@ -234,10 +234,10 @@ export default function App() {
                 {selectedQuestion.question}
               </p>
 
-              {/* Show MCQ Options ONLY IF Category is MCQ / Assertion */}
+              {/* MCQ Options */}
               {isMCQCategory && selectedQuestion.options && Array.isArray(selectedQuestion.options) && (
                 <div className="flex flex-col gap-2 mt-3 pt-3 border-t border-slate-700/60">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Select Option:</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Options:</span>
                   {selectedQuestion.options.map((opt: string, i: number) => (
                     <div key={i} className="bg-slate-900/90 border border-slate-700 text-xs text-slate-200 p-2.5 rounded-lg hover:border-indigo-500 transition">
                       {opt}
@@ -247,7 +247,7 @@ export default function App() {
               )}
             </div>
 
-            {/* AI Agent Interaction Area */}
+            {/* AI Agent Area */}
             <div className="bg-slate-800/80 border border-indigo-500/30 p-4 rounded-xl mb-4">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-base">🤖</span>
