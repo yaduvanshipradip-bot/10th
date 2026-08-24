@@ -1,66 +1,169 @@
-export const cbseData = [
+export interface QuestionItem {
+  id: number;
+  question: string;
+  options?: string[];
+  marks: string;
+  tag: string;
+  hint1: string;
+  hint2: string;
+  answer: string;
+}
+
+export interface ChapterItem {
+  id: number;
+  name: string;
+  probability: string;
+  frequency: string;
+  questions: QuestionItem[];
+}
+
+export interface SubjectItem {
+  subjectId: string;
+  subjectName: string;
+  chapters: ChapterItem[];
+}
+
+export const cbseData: SubjectItem[] = [
   {
-    subjectId: "science",
-    subjectName: "🧪 Science",
+    subjectId: "english",
+    subjectName: "📖 English",
     chapters: [
-      { id: 101, name: "1. Chemical Reactions and Equations", probability: "HIGH (90% Chance)", frequency: "Asked 8/10 years" },
-      { id: 102, name: "2. Acids, Bases and Salts", probability: "VERY HIGH (92% Chance)", frequency: "Asked 9/10 years" },
-      { id: 103, name: "3. Metals and Non-metals", probability: "HIGH (88% Chance)", frequency: "Asked 8/10 years" },
-      { id: 104, name: "4. Carbon and its Compounds", probability: "VERY HIGH (95% Chance)", frequency: "Asked 10/10 years" },
-      { id: 105, name: "5. Life Processes", probability: "VERY HIGH (96% Chance)", frequency: "Asked 10/10 years" },
-      { id: 106, name: "6. Control and Coordination", probability: "HIGH (85% Chance)", frequency: "Asked 8/10 years" },
-      { id: 107, name: "7. How do Organisms Reproduce?", probability: "HIGH (90% Chance)", frequency: "Asked 9/10 years" },
-      { id: 108, name: "8. Heredity and Evolution", probability: "HIGH (87% Chance)", frequency: "Asked 8/10 years" },
-      { id: 109, name: "9. Light - Reflection and Refraction", probability: "VERY HIGH (95% Chance)", frequency: "Asked 10/10 years" },
-      { id: 110, name: "10. The Human Eye and Colorful World", probability: "HIGH (89% Chance)", frequency: "Asked 8/10 years" },
-      { id: 111, name: "11. Electricity", probability: "VERY HIGH (94% Chance)", frequency: "Asked 10/10 years" },
-      { id: 112, name: "12. Magnetic Effects of Electric Current", probability: "HIGH (90% Chance)", frequency: "Asked 9/10 years" },
-      { id: 113, name: "13. Our Environment", probability: "HIGH (85% Chance)", frequency: "Asked 7/10 years" }
+      {
+        id: 401,
+        name: "1. A Letter to God",
+        probability: "HIGH (90% Chance)",
+        frequency: "Asked 9/10 years",
+        questions: [
+          {
+            id: 4001,
+            question: "Why did Lencho write a letter to God? What specific help did he ask for?",
+            options: ["A) 100 Pesos for seeds & food", "B) 50 Pesos for house", "C) 500 Pesos for tractor", "D) 70 Pesos for rain"],
+            marks: "3",
+            tag: "Literature - Letter to God",
+            hint1: "💡 Hint 1: Lencho's entire corn crop was destroyed by a devastating hailstorm.",
+            hint2: "💡 Hint 2: He had immense faith in God and needed money to resow his field.",
+            answer: "Lencho's corn field was completely destroyed by a severe hailstorm. Having unshakable faith in God, he wrote asking for 100 pesos to resow his field and feed his family until the next harvest."
+          },
+          {
+            id: 4002,
+            question: "Why did Lencho call the post office employees 'a bunch of crooks'?",
+            marks: "3",
+            tag: "Irony - Letter to God",
+            hint1: "💡 Hint 1: He asked for 100 pesos but found only 70 pesos in the envelope.",
+            hint2: "💡 Hint 2: He believed God couldn't make a mistake, so workers must have stolen 30 pesos.",
+            answer: "Lencho asked God for 100 pesos but received only 70. Believing God would never make a mistake, he suspected the post office employees stole the missing 30 pesos, calling them 'a bunch of crooks'."
+          }
+        ]
+      },
+      {
+        id: 402,
+        name: "2. Nelson Mandela: Long Walk to Freedom",
+        probability: "VERY HIGH (95% Chance)",
+        frequency: "Asked 10/10 years",
+        questions: [
+          {
+            id: 4003,
+            question: "What did courage mean to Nelson Mandela in his autobiography?",
+            options: ["A) Triumph over fear", "B) Absence of fear", "C) Physical power", "D) Avoiding danger"],
+            marks: "1",
+            tag: "MCQ - Nelson Mandela",
+            hint1: "💡 Hint 1: Courage is not the absence of fear.",
+            hint2: "💡 Hint 2: It is the victory/triumph over fear.",
+            answer: "Option A) Triumph over fear. To Mandela, courage was not the absence of fear, but the triumph over it. A brave man is not he who does not feel afraid, but he who conquers that fear."
+          },
+          {
+            id: 4004,
+            question: "Describe the 'twin obligations' mentioned by Nelson Mandela.",
+            marks: "5",
+            tag: "5-Mark Long Question - Mandela",
+            hint1: "💡 Hint 1: First obligation is to family (parents, wife, children).",
+            hint2: "💡 Hint 2: Second obligation is to his people, community, and country.",
+            answer: "Mandela mentions twin obligations:\n1. Obligation to Family: To care for parents, wife, children, and home.\n2. Obligation to Country: To serve his people, community, and nation South Africa."
+          }
+        ]
+      }
     ]
   },
   {
     subjectId: "maths",
     subjectName: "📐 Mathematics",
     chapters: [
-      { id: 201, name: "1. Real Numbers", probability: "HIGH (88% Chance)", frequency: "Asked 9/10 years" },
-      { id: 202, name: "2. Polynomials", probability: "HIGH (90% Chance)", frequency: "Asked 9/10 years" },
-      { id: 203, name: "3. Pair of Linear Equations in Two Variables", probability: "HIGH (91% Chance)", frequency: "Asked 9/10 years" },
-      { id: 204, name: "4. Quadratic Equations", probability: "VERY HIGH (95% Chance)", frequency: "Asked 10/10 years" },
-      { id: 205, name: "5. Arithmetic Progressions (AP)", probability: "VERY HIGH (93% Chance)", frequency: "Asked 10/10 years" },
-      { id: 206, name: "6. Triangles", probability: "VERY HIGH (96% Chance)", frequency: "Asked 10/10 years" },
-      { id: 207, name: "7. Coordinate Geometry", probability: "HIGH (89% Chance)", frequency: "Asked 8/10 years" },
-      { id: 208, name: "8. Introduction to Trigonometry", probability: "VERY HIGH (98% Chance)", frequency: "Asked 10/10 years" },
-      { id: 209, name: "9. Some Applications of Trigonometry", probability: "VERY HIGH (94% Chance)", frequency: "Asked 10/10 years" },
-      { id: 210, name: "10. Circles", probability: "HIGH (90% Chance)", frequency: "Asked 9/10 years" },
-      { id: 211, name: "11. Areas Related to Circles", probability: "HIGH (88% Chance)", frequency: "Asked 8/10 years" },
-      { id: 212, name: "12. Surface Areas and Volumes", probability: "VERY HIGH (95% Chance)", frequency: "Asked 10/10 years" },
-      { id: 213, name: "13. Statistics", probability: "HIGH (92% Chance)", frequency: "Asked 9/10 years" },
-      { id: 214, name: "14. Probability", probability: "HIGH (85% Chance)", frequency: "Asked 8/10 years" }
+      {
+        id: 201,
+        name: "1. Real Numbers",
+        probability: "HIGH (88% Chance)",
+        frequency: "Asked 9/10 years",
+        questions: [
+          {
+            id: 2001,
+            question: "Prove that √5 is an Irrational Number using the method of contradiction.",
+            marks: "3",
+            tag: "Guaranteed Board Question - Maths",
+            hint1: "💡 Hint 1: Assume √5 = a/b where 'a' and 'b' are co-prime integers (b ≠ 0).",
+            hint2: "💡 Hint 2: Show that 5 divides both 'a' and 'b', contradicting co-prime assumption.",
+            answer: "1. Let √5 = a/b (co-prime integers, b ≠ 0).\n2. 5b² = a² => 5 divides a² => 5 divides a.\n3. Let a = 5c => 5b² = 25c² => b² = 5c² => 5 divides b.\n4. Contradiction! 'a' and 'b' have common factor 5. Hence √5 is irrational."
+          }
+        ]
+      },
+      {
+        id: 202,
+        name: "2. Quadratic Equations",
+        probability: "VERY HIGH (92% Chance)",
+        frequency: "Asked 10/10 years",
+        questions: [
+          {
+            id: 2002,
+            question: "Find the discriminant of 2x² - 4x + 3 = 0 and determine the nature of its roots.",
+            options: ["A) D = -8 (No real roots)", "B) D = 8 (Two distinct roots)", "C) D = 0 (Equal roots)", "D) D = 16"],
+            marks: "2",
+            tag: "Discriminant Formula - Maths",
+            hint1: "💡 Hint 1: Discriminant formula D = b² - 4ac.",
+            hint2: "💡 Hint 2: Here a = 2, b = -4, c = 3.",
+            answer: "Option A) D = -8 (No real roots).\nCalculation: D = (-4)² - 4(2)(3) = 16 - 24 = -8. Since D < 0, no real roots exist."
+          }
+        ]
+      }
     ]
   },
   {
-    subjectId: "sst",
-    subjectName: "🌍 Social Science",
+    subjectId: "science",
+    subjectName: "🧪 Science",
     chapters: [
-      { id: 301, name: "1. The Rise of Nationalism in Europe (History)", probability: "HIGH (90% Chance)", frequency: "Asked 9/10 years" },
-      { id: 302, name: "2. Nationalism in India (History)", probability: "VERY HIGH (98% Chance)", frequency: "Asked 10/10 years" },
-      { id: 303, name: "3. Resources and Development (Geography)", probability: "HIGH (88% Chance)", frequency: "Asked 8/10 years" },
-      { id: 304, name: "4. Agriculture (Geography)", probability: "HIGH (90% Chance)", frequency: "Asked 9/10 years" },
-      { id: 305, name: "5. Power Sharing (Civics)", probability: "HIGH (89% Chance)", frequency: "Asked 8/10 years" },
-      { id: 306, name: "6. Federalism (Civics)", probability: "HIGH (91% Chance)", frequency: "Asked 9/10 years" },
-      { id: 307, name: "7. Development (Economics)", probability: "HIGH (87% Chance)", frequency: "Asked 8/10 years" },
-      { id: 308, name: "8. Money and Credit (Economics)", probability: "VERY HIGH (93% Chance)", frequency: "Asked 10/10 years" }
-    ]
-  },
-  {
-    subjectId: "english",
-    subjectName: "📖 English",
-    chapters: [
-      { id: 401, name: "1. A Letter to God", probability: "HIGH (90% Chance)", frequency: "Asked 9/10 years" },
-      { id: 402, name: "2. Nelson Mandela: Long Walk to Freedom", probability: "VERY HIGH (95% Chance)", frequency: "Asked 10/10 years" },
-      { id: 403, name: "3. Two Stories about Flying", probability: "HIGH (88% Chance)", frequency: "Asked 8/10 years" },
-      { id: 404, name: "4. From the Diary of Anne Frank", probability: "HIGH (89% Chance)", frequency: "Asked 9/10 years" },
-      { id: 405, name: "5. Formal Letter & Analytical Paragraph Writing", probability: "VERY HIGH (100% Chance)", frequency: "Asked 10/10 years" }
+      {
+        id: 101,
+        name: "1. Chemical Reactions and Equations",
+        probability: "HIGH (90% Chance)",
+        frequency: "Asked 8/10 years",
+        questions: [
+          {
+            id: 1001,
+            question: "What happens when Calcium Oxide (Quicklime) reacts with Water? Write balanced chemical equation.",
+            options: ["A) Exothermic Combination", "B) Endothermic Decomposition", "C) Displacement", "D) Neutralization"],
+            marks: "3",
+            tag: "Chemistry - Chemical Reactions",
+            hint1: "💡 Hint 1: Think whether heat is released or absorbed during this reaction.",
+            hint2: "💡 Hint 2: CaO + H₂O produces Slaked Lime [Ca(OH)₂].",
+            answer: "Option A) Exothermic Combination Reaction.\nEquation: CaO(s) + H₂O(l) → Ca(OH)₂(aq) + Heat.\n1. Slaked Lime is formed.\n2. Large amount of heat is evolved."
+          }
+        ]
+      },
+      {
+        id: 102,
+        name: "2. Electricity",
+        probability: "VERY HIGH (95% Chance)",
+        frequency: "Asked 10/10 years",
+        questions: [
+          {
+            id: 1002,
+            question: "State Joule's Law of Heating. Express it mathematically and state unit of power.",
+            marks: "5",
+            tag: "5-Mark Long Question - Physics",
+            hint1: "💡 Hint 1: Heat produced H is directly proportional to square of current I².",
+            hint2: "💡 Hint 2: Formula H = I²Rt. Power P = VI = I²R.",
+            answer: "1. Joule's Law of Heating: Heat produced in a resistor is directly proportional to:\n   - Square of current (H ∝ I²)\n   - Resistance (H ∝ R)\n   - Time (H ∝ t)\n   => H = I²Rt Joules.\n2. Electric Power P = V × I = I²R = V²/R. S.I. unit is Watt (W)."
+          }
+        ]
+      }
     ]
   }
 ];

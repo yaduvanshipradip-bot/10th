@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { cbseData } from './data';
-import { getAIChapterQuestions, getLiveAIHint } from './aiService';
+import { cbseData, SubjectItem, ChapterItem, QuestionItem } from './data';
+import { getLiveAIHint } from './aiService';
 
 const categories = [
+  "🎯 All Types",
   "🔘 MCQs (1 Mark)",
   "🧩 Assertion & Reason",
   "📖 Case Study (4 Marks)",
@@ -13,27 +14,40 @@ const categories = [
 export default function App() {
   const [screen, setScreen] = useState<'setup' | 'qlist' | 'qdetail'>('setup');
 
-  const [selectedSubject, setSelectedSubject] = useState(cbseData[0]);
-  const [selectedChapter, setSelectedChapter] = useState(cbseData[0].chapters[0]);
-  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
-  const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
+  const [selectedSubject, setSelectedSubject] = useState<SubjectItem>(cbseData[0]);
+  const [selectedChapter, setSelectedChapter] = useState<ChapterItem>(cbseData[0].chapters[0]);
+  const [selectedCategory, setSelectedCategory] = useState<string>(categories[0]);
+  const [selectedQuestion, setSelectedQuestion] = useState<QuestionItem | null>(null);
 
-  const [questions, setQuestions] = useState<any[]>([]);
-  const [loadingQuestions, setLoadingQuestions] = useState(false);
+  const [hintStep, setHintStep] = useState<number>(0);
+  const [aiHintText, setAiHintText] = useState<string>('');
+  const [loadingAI, setLoadingAI] = useState<boolean>(false);
 
-  const [hintStep, setHintStep] = useState(0);
-  const [aiHintText, setAiHintText] = useState('');
-  const [loadingAI, setLoadingAI] = useState(false);
-
-  const handleStartPractice = async () => {
-    setLoadingQuestions(true);
-    setScreen('qlist');
-    const qList = await getAIChapterQuestions(selectedSubject.subjectName, selectedChapter.name, selectedCategory);
-    setQuestions(qList);
-    setLoadingQuestions(false);
+  // FLUSH STATE ON SUBJECT CHANGE (Zero Mixing!)
+  const handleSubjectChange = (sub: SubjectItem) => {
+    setSelectedSubject(sub);
+    setSelectedChapter(sub.chapters[0]);
+    setSelectedQuestion(null);
+    setHintStep(0);
+    setAiHintText('');
   };
 
-  const handleSelectQuestion = (q: any) => {
+  // FLUSH STATE ON CHAPTER CHANGE
+  const handleChapterChange = (chap: ChapterItem) => {
+    setSelectedChapter(chap);
+    setSelectedQuestion(null);
+    setHintStep(0);
+    setAiHintText('');
+  };
+
+  const handleStartPractice = () => {
+    setSelectedQuestion(null);
+    setHintStep(0);
+    setAiHintText('');
+    setScreen('qlist');
+  };
+
+  const handleSelectQuestion = (q: QuestionItem) => {
     setSelectedQuestion(q);
     setHintStep(0);
     setAiHintText('');
@@ -41,6 +55,7 @@ export default function App() {
   };
 
   const handleGetAIHint = async (level: number) => {
+    if (!selectedQuestion) return;
     setLoadingAI(true);
     setHintStep(level);
     const aiResponse = await getLiveAIHint(selectedQuestion.question, level);
@@ -81,23 +96,20 @@ export default function App() {
           <div>
             <div className="text-center my-3">
               <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs px-3 py-1 rounded-full font-semibold">
-                🎯 10-Year CBSE PYQ Agent
+                🎯 10-Year CBSE Board PYQ Agent
               </span>
-              <h2 className="text-xl font-bold mt-2 text-white">Authentic Board Exam Papers</h2>
-              <p className="text-xs text-slate-400 mt-1">Real Verified Questions • AI Hints</p>
+              <h2 className="text-xl font-bold mt-2 text-white">Target Your Board Marks</h2>
+              <p className="text-xs text-slate-400 mt-1">Authentic Chapter Questions & AI Hints</p>
             </div>
 
             {/* Step 1: Subject */}
             <div className="mb-4 mt-6">
               <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">1. Select Subject</label>
               <div className="grid grid-cols-2 gap-2 mt-2">
-                {cbseData.map((sub: any) => (
+                {cbseData.map((sub) => (
                   <button
                     key={sub.subjectId}
-                    onClick={() => {
-                      setSelectedSubject(sub);
-                      setSelectedChapter(sub.chapters[0]);
-                    }}
+                    onClick={() => handleSubjectChange(sub)}
                     className={`p-3 rounded-xl border text-left font-bold text-xs transition flex items-center justify-between ${
                       selectedSubject.subjectId === sub.subjectId
                         ? 'bg-gradient-to-r from-indigo-600 to-purple-600 border-indigo-400 text-white shadow-lg scale-[1.02]'
@@ -118,11 +130,11 @@ export default function App() {
                 className="w-full mt-2 p-3 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                 value={selectedChapter.id}
                 onChange={(e) => {
-                  const chap = selectedSubject.chapters.find((ch: any) => ch.id === parseInt(e.target.value));
-                  if (chap) setSelectedChapter(chap);
+                  const chap = selectedSubject.chapters.find((ch) => ch.id === parseInt(e.target.value));
+                  if (chap) handleChapterChange(chap);
                 }}
               >
-                {selectedSubject.chapters.map((ch: any) => (
+                {selectedSubject.chapters.map((ch) => (
                   <option key={ch.id} value={ch.id}>{ch.name}</option>
                 ))}
               </select>
@@ -153,7 +165,7 @@ export default function App() {
             onClick={handleStartPractice}
             className="w-full py-4 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 hover:from-amber-600 hover:to-red-600 text-slate-950 font-extrabold text-sm rounded-xl shadow-xl transition transform active:scale-95 text-center flex items-center justify-center gap-2"
           >
-            🔍 Search 10-Year CBSE Papers ➔
+            🚀 Get Chapter Questions ➔
           </button>
         </main>
       )}
@@ -169,21 +181,12 @@ export default function App() {
           </div>
 
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
-            Verified 10-Year CBSE Board Questions:
+            High-Probability Board Questions:
           </h3>
 
-          {loadingQuestions && (
-            <div className="bg-slate-800/50 border border-slate-700/50 p-8 rounded-2xl text-center my-6">
-              <div className="inline-block animate-spin text-2xl mb-2">⚡</div>
-              <p className="text-xs font-bold text-indigo-400 animate-pulse">
-                🔍 Searching 10-Year CBSE Papers & NCERT Question Bank for {selectedChapter.name}...
-              </p>
-            </div>
-          )}
-
-          {!loadingQuestions && questions.map((q, index) => (
+          {selectedChapter.questions.map((q, index) => (
             <div
-              key={q.id || index}
+              key={q.id}
               onClick={() => handleSelectQuestion(q)}
               className="bg-slate-800 hover:bg-slate-750 border border-slate-700/80 hover:border-purple-500/50 p-4 rounded-xl mb-3 cursor-pointer transition shadow-md active:scale-[0.99] flex flex-col justify-between"
             >
@@ -198,10 +201,10 @@ export default function App() {
                 {q.question}
               </p>
 
-              {/* MCQ 4 Options Display */}
-              {isMCQCategory && q.options && Array.isArray(q.options) && (
+              {/* Show MCQ Options ONLY IF Question has options */}
+              {q.options && Array.isArray(q.options) && (
                 <div className="grid grid-cols-2 gap-1.5 my-2">
-                  {q.options.map((opt: string, i: number) => (
+                  {q.options.map((opt, i) => (
                     <div key={i} className="bg-slate-900/60 border border-slate-700/50 text-[10px] text-slate-300 p-1.5 rounded truncate">
                       {opt}
                     </div>
@@ -223,7 +226,7 @@ export default function App() {
           <div>
             <div className="flex justify-between items-center mb-3">
               <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
-                {selectedCategory}
+                {selectedQuestion.tag}
               </span>
               <span className="text-slate-400 text-xs font-semibold">{selectedQuestion.marks} Marks</span>
             </div>
@@ -235,10 +238,10 @@ export default function App() {
               </p>
 
               {/* MCQ Options */}
-              {isMCQCategory && selectedQuestion.options && Array.isArray(selectedQuestion.options) && (
+              {selectedQuestion.options && Array.isArray(selectedQuestion.options) && (
                 <div className="flex flex-col gap-2 mt-3 pt-3 border-t border-slate-700/60">
                   <span className="text-[10px] font-bold text-slate-400 uppercase">Options:</span>
-                  {selectedQuestion.options.map((opt: string, i: number) => (
+                  {selectedQuestion.options.map((opt, i) => (
                     <div key={i} className="bg-slate-900/90 border border-slate-700 text-xs text-slate-200 p-2.5 rounded-lg hover:border-indigo-500 transition">
                       {opt}
                     </div>
@@ -263,7 +266,7 @@ export default function App() {
               {!loadingAI && hintStep >= 1 && hintStep < 3 && (
                 <div className="p-3 bg-indigo-950/80 border border-indigo-700/60 text-indigo-200 text-xs rounded-lg mb-3 leading-relaxed shadow-inner">
                   <strong className="text-amber-400 block mb-1">💡 Hint {hintStep}:</strong>
-                  {aiHintText || selectedQuestion[`hint${hintStep}`]}
+                  {aiHintText || (selectedQuestion as any)[`hint${hintStep}`]}
                 </div>
               )}
 
